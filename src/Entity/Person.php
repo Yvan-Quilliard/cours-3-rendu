@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Exception;
+
 class Person
 {
     /** @var string $name The name of the person.  */
@@ -67,19 +69,19 @@ class Person
      */
     public function hasFund(): bool
     {
-        return $this->wallet->getBalance() !== 0;
+        return $this->wallet->getBalance() > 0;
     }
     /**
      * Transfers funds from the person's wallet to another person's wallet.
      *
      * @param float $amount The amount of funds to transfer.
      * @param Person $person The person to transfer funds to.
-     * @throws \Exception If this wallet currency is different from the person's wallet currency.
+     * @throws Exception If this wallet currency is different from the person's wallet currency.
      */
     public function transfertFund(float $amount, Person $person): void
     {
         if ($person->wallet->getCurrency() !== $this->wallet->getCurrency()) {
-            throw new \Exception('Can\'t give money with different currencies');
+            throw new Exception('Can\'t give money with different currencies');
         }
         $this->wallet->removeFund($amount);
         $person->wallet->addFund($amount);
@@ -89,6 +91,7 @@ class Person
      * Divides the balance of the person's wallet among a group of persons.
      *
      * @param array<Person> $persons The persons to divide the wallet balance among.
+     * @throws Exception
      */
     public function divideWallet(array $persons): void
     {
@@ -101,18 +104,19 @@ class Person
             $this->transfertFund($partPerPerson, $persons[$index]);
         }
     }
+
     /**
      * Buys a product using the person's wallet.
      *
      * @param Product $product The product to buy.
-     * @throws \Exception If the product cannot be bought with the person's wallet currency.
+     * @throws Exception If the product cannot be bought with the person's wallet currency.
      */
     public function buyProduct(Product $product): void
     {
         $walletCurrency = $this->wallet->getCurrency();
         $productAvailableCurrency = $product->listCurrencies();
         if (!in_array($walletCurrency, $productAvailableCurrency)) {
-            throw new \Exception('Can\'t buy product with this wallet currency');
+            throw new Exception('Can\'t buy product with this wallet currency');
         }
         $this->wallet->removeFund($product->getPrice($walletCurrency));
     }

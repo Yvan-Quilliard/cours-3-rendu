@@ -23,6 +23,7 @@ class Product
      */
     public function __construct(string $name, array $prices, string $type)
     {
+        $this->prices = [];
         $this->setName($name);
         $this->setPrices($prices);
         $this->setType($type);
